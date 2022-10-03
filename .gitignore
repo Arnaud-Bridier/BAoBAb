@@ -1,1 +1,2 @@
-genome_assembly.sh
+genome_assembly/genome_assembly.sh
+variant_calling/variant_calling.sh
