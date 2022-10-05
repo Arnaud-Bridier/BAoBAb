@@ -1,2 +1,2 @@
 # BAoBAb
-Different pipeline for analysis of bacterial genomes
+Different pipeline for bacterial genomes analysis
