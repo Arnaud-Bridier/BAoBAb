@@ -7,7 +7,7 @@ POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}_001.fastq.gz")
 rule all:
     input:
         expand("fastqc/{pos}_{frr}_001_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
-        expand("snippy/{pos}/{pos}_snps.tab", pos=POS)
+        expand("snippy/output/variants")
 
 # FastQC
 rule fastQC:
@@ -77,4 +77,18 @@ rule snippy:
         --R1 {input.forward_paired} \
         --R2 {input.reverse_paired} \
         2>{log}
+        """
+
+rule regroup_variant:
+    input:
+        metadata = "metadata.csv"
+    output:
+        all_variants = "snippy/output/variants.csv"
+    message:
+        "Regroup all the variants according to the metadata"
+    params:
+        directory = "snippy/"
+    shell:
+        """ 
+        python3 snp_regroup.py {input.metadata} {params.directory}
         """
