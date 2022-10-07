@@ -58,7 +58,7 @@ rule snippy:
         reverse_paired = rules.trimmomatic.output.reverse_paired,
         genome_ref = config["reference"]
     output:
-        snp_variant = "snippy/{pos}/{pos}_snps.tab"
+        snps_tab = "snippy/{pos}/{pos}_snps.tab"
     message:
         "Call the variant"
     threads: 32
@@ -79,16 +79,29 @@ rule snippy:
         2>{log}
         """
 
+rule take_tab_path:
+    input:
+        snps_tab = expand("snippy/{pos}/{pos}_snps.tab", pos=POS)
+    output:
+        snps_path_tab = "snippy/snps_path_tab.txt"
+    message:
+        "Regroup all the path of the snps.tab"
+    shell:
+        """
+        realpath {input.snps_tab} >> {output.snps_path_tab}
+        """
+
 rule regroup_variant:
     input:
+        snps_path_tab = rules.take_tab_path.output.snps_path_tab,
         metadata = "metadata.csv"
     output:
-        all_variants = "snippy/output/variants.csv"
+        all_variants = "snippy/output/variants.tab"
     message:
         "Regroup all the variants according to the metadata"
     params:
         directory = "snippy/"
     shell:
         """ 
-        python3 snp_regroup.py {input.metadata} {params.directory}
+        python3 snp_regroup.py {input.metadata} {input.snps_path_tab} {params.directory}
         """
