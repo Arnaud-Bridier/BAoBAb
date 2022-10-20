@@ -3,14 +3,14 @@ import os
 import csv
 
 """
-Input
+Input.
 """
-path_metadata = str(sys.argv[1])
-path_tab_files = str(sys.argv[2])
-path_snippy = str(sys.argv[3])
+path_metadata = str(sys.argv[1]) # Metadata of the different strains
+path_tab_files = str(sys.argv[2]) # Path file for strains variants
+path_snippy = str(sys.argv[3]) # Path for snippy
 
 """
-Ouverture du fichier de métadonnée et création du dictionnaire avec les souches pour chaque biocides.
+Opening the metadata file and creating the dictionary with the strains for each biocide and resistance.
 """
 with open(path_metadata, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
@@ -34,13 +34,13 @@ for s in metadata[1:]:
         dict_resistance[s[2]] = [s[0]]
 
 """
-Récupération de tous les fichiers .tab avec les variants dedans.
+Recovery of all .tab files with variants in them.
 """
 with open(path_tab_files) as txtfile:
-    tab_files = txtfile.read().split("\n")[::2]
+    tab_files = txtfile.read().split("\n")
 
 """
-Mise en place des variables csv pour les output
+Mise en place des tableaux .csv pour les output.
 """
 variants = [['STRAIN', 'CHROM', 'POS', 'TYPE', 'REF', 'ALT', 'EVIDENCE', 'FTYPE', 'STRAND', 'NT_POS', 'AA_POS', 'EFFECT', 'LOCUS_TAG', 'GENE', 'PRODUCT']]
 count_variant = [['STRAIN', 'SNP', 'MNP', 'INS', 'DEL', 'COMPLEX', 'TOTAL']]
@@ -81,25 +81,32 @@ if "Gentamycine" in dict_resistance.keys():
     output_csv["variants_Gentamycine.tab"] = variants_Gentamycine
 
 """
-Récupération de tous les variants.
+Recovery of all variants.
 """
+temp_files = []
 for files in tab_files:
+
+    #Fix error from path file.
+    if files not in temp_files:
+        temp_files.append(files)
+    else:
+        continue
 
     if files == '':
         continue
     else:
         
-        # Ouverture du fichier
+        # Open the file.
         with open(files, newline ='') as csvfile:
             variant_reader = csv.reader(csvfile, delimiter='\t')
             variant_list = []
             for i in variant_reader:
                 variant_list.append(i)
 
-        # Récupération du nom de souche        
+        # Recovery of the strain name.
         strain = os.path.split(files)[1].partition('_')[0]
 
-        # Variable temporaire pour compter les variants et les stocker
+        # Temporary variable to count variants and store them.
         snp = 0
         mnp = 0
         ins = 0
@@ -108,7 +115,7 @@ for files in tab_files:
         strain_variants = []
                 
         for var in variant_list[1:]:
-            # Compte le nombre de variants
+            # Count variants.
             if var[2] == "snp":
                 snp += 1
             elif var[2] == "mnp":
@@ -120,7 +127,7 @@ for files in tab_files:
             elif var[2] == "complex":
                 comp += 1
 
-            #Récolte de tous les variants dans un liste temp
+            # Collection of all variants in a temporary list.
             var.insert(0, strain)
             strain_variants.append(var)
 
@@ -161,9 +168,10 @@ for files in tab_files:
                 continue
 
 """
-Output
-Création d'un dossier output avec tous les fichiers dedans
+Output.
 """
+
+# Create the output folder.
 try:
     os.mkdir(f"{path_snippy}/output")
 except OSError as e:

@@ -3,7 +3,7 @@ import glob
 
 POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}_001.fastq.gz")
 
-# Véritable output voulu
+# Rule for the latest files wanted
 rule all:
     input:
         expand("fastqc/{pos}_{frr}_001_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
