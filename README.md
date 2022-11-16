@@ -6,11 +6,11 @@ Assemble bacterial genome and make variants call.
 This project contains two pipelines handled by Snakemake :
 * A de novo bacterial genome assembler coupled with gene annotation.
 
-<p align="center"><img src="genome_assembly/rulegraph_pipeline_assembly.png" alt="pipeline for de novo assembly" width="300"></p>
+<p align="center"><img src="genome_assembly/rulegraph_pipeline_assembly.png" alt="pipeline for de novo assembly" width="250"></p>
 
-* A pipeline for variant calling by comparing against a reference genome.
+* A pipeline for variant calling by comparing against a reference genome. Can be used with a metadata file listing the different bacterial strains used and the experimental conditions (ex : `variant_calling/metadata.csv`).
 
-The 2 tools are used separately.
+<p align="center"><img src="variant_calling/rulegraph_pipeline_variant_calling.png" alt="pipeline for variant calling" width="250"></p>
 
 ## Installation
 
