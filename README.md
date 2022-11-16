@@ -6,7 +6,7 @@ Assemble bacterial genome and make variants call.
 This project contains two pipelines handled by Snakemake :
 * A de novo bacterial genome assembler coupled with gene annotation.
 
-<p align="center"><img src="genome_assembly/rulegraph_pipeline_assembly.png" alt="Unicycler" width="600"></p>
+<p align="center"><img src="genome_assembly/rulegraph_pipeline_assembly.png" alt="pipeline for de novo assembly"></p>
 
 * A pipeline for variant calling by comparing against a reference genome.
 
