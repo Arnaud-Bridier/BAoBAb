@@ -25,13 +25,10 @@ Installing all the dependencies manually:
 
 Soft|Version
 ---------|------------
-`contigs.fa` | The final assembly you should use
-`shovill.log` | Full log file for bug reporting
-`shovill.corrections` | List of post-assembly corrections
-`contigs.gfa` | Assembly graph (spades)
-`contigs.fastg` | Assembly graph (megahit)
-`contigs.LastGraph` | Assembly graph (velvet)
-`skesa.fasta` | Raw assembly (skesa)
-`spades.fasta` | Raw assembled contigs (spades)
-`megahit.fasta` | Raw assembly (megahit)
-`velvet.fasta` | Raw assembly (velvet)
+`Abricate` | 1.0.1
+`fatQC` | 0.11.9
+`Prokka` | 1.14.6
+`Quast` | 5.2.0
+`Snippy` | 4.6.0
+`Trimmomatic` | 0.39
+`Unicycler` | 0.4.8
