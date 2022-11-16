@@ -25,7 +25,7 @@ Installing all the dependencies manually:
 
 Soft|Version
 ---------|------------
-[Abricate]https://www.bioinformatics.babraham.ac.uk/projects/fastqc/ | 1.0.1
+[Abricate](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) | 1.0.1
 `fatQC` | 0.11.9
 `Prokka` | 1.14.6
 `Quast` | 5.2.0
