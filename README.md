@@ -16,7 +16,7 @@ This project contains two pipelines handled by Snakemake :
 
 ### Conda
 
-Creatin a conda environment using `baobab_env.yml`.
+Creating a conda environment using `baobab_env.yml`.
 
 ```
 conda env create -f baobab_env.yml
