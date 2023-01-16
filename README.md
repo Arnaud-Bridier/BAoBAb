@@ -34,7 +34,6 @@ Soft|Version
 [Quast](https://quast.sourceforge.net/) | 5.2.0
 [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) | 0.39
 [Unicycler](https://github.com/rrwick/Unicycler) | 0.4.8
-
 [Snippy](https://github.com/tseemann/snippy) | 4.6.0
 
 ## De novo assembly
