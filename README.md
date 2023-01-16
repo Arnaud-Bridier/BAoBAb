@@ -47,7 +47,7 @@ usage : snakemake -s snakefile_assembly.py
 
 ### Requirements
 
-* Input : All paired reads need to be located in the `raw_reads` folder.
+* Input : All paired reads need to be located in a `raw_reads` folder.
 * The Trimmomatic parameters need to be changed to match the analyses obtained with FastQC.
 
 ## Variant calling
@@ -60,5 +60,5 @@ usage : snakemake -s snakefile_variant_calling.py --configfile config.yaml
 
 ### Requirements
 
-* Input : All paired reads need to be located in the `raw_reads` folder.
+* Input : All paired reads need to be located in a `raw_reads` folder.
 * The Trimmomatic parameters need to be changed to match the analyses obtained with FastQC.
