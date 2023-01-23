@@ -3,6 +3,10 @@ import glob
 
 POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}_001.fastq.gz")
 
+folder = ["fastqc", "trimmed_reads", "snippy"]
+for f in folder:
+    os.mkdir(f)
+
 # Rule for the latest files wanted
 rule all:
     input:

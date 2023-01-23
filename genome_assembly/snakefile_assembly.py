@@ -1,6 +1,10 @@
 import os
 import glob
 
+folder = ["fastqc", "trimmed_reads", "assemblyqc", "genome_annotation", "genome_assembly", "abritamr_result"]
+for f in folder:
+    os.mkdir(f)
+
 POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}_001.fastq.gz")
 
 # Rule for the latest files wanted
@@ -8,7 +12,8 @@ rule all:
     input:
         expand("fastqc/{pos}_{frr}_001_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
         expand("assemblyqc/{pos}_assemblyqc/report.html", pos=POS),
-        expand("genome_annotation/{pos}_annotation/{pos}.tab", pos=POS)
+        expand("genome_annotation/{pos}_annotation/{pos}.tab", pos=POS),
+        "abritamr_result/abritamr.txt"
 
 # FastQC
 rule fastQC:
@@ -100,7 +105,8 @@ rule prokka:
     input:
         genome_assembly = rules.assembly.output.genome_assembly
     output:
-        genome_annotation = "genome_annotation/{pos}_annotation/{pos}.gff"
+        genome_annotation = "genome_annotation/{pos}_annotation/{pos}.gff",
+        genome_fasta = dynamic("genome_annotation/{pos}_annotation/{pos}.fna")
     message:
         "Annotate the genome."
     log:
@@ -153,16 +159,46 @@ rule quast:
         --glimmer
         """
 
-# Research for antimicrobial genes resistance
-rule abricate:
+# Take assembly of strains in one file
+rule regroup_fasta_file:
     input:
-        genome_annotation = rules.prokka.output.genome_annotation
+        genome_fasta = rules.genome_annotation.output.genome_fasta
     output:
-        tab_amrg = "genome_annotation/{pos}_annotation/{pos}.tab"
+        fasta_file = "abritamr_result/fasta_abritamr.tsv"
     message:
-        "Research for antimicrobial genes resistance"
-    threads: 32
+        "Regroup fasta file for abritamr"
+    run:
+        list_fasta_strain_file = {}
+
+        strains_folder = os.listdir("genome_annotation/")
+
+        for f in strains_folder:
+
+            #Obtain fasta file name.
+            strain_name = f[:-11]
+            fasta_strain_file = strain_name + ".fna"
+
+            #Recup the strain name and path file.
+            strain = strain_name.split("_")[0]
+            path_fasta_file = "genome_annotation/" + f + "/" + fasta_strain_file
+
+            list_fasta_strain_file[strain] = "genome_annotation/" + f + "/" + fasta_strain_file
+
+        file_fasta = "abritamr_result/fasta_abritamr.tsv"
+
+        with open(file_fasta, 'w') as txtfile:
+            for strain, path in list_fasta_strain_file.items():
+                txtfile.write(f'{strain}\t{path}\n')
+
+# Research for antimicrobial genes resistance
+rule abritamr:
+    input:
+        list_fasta_file = rules.regroup_fasta_file.output.fasta_file
+    output:
+        summary_abritamr = "abritamr_result/abritamr.txt"
+    message:
+        "Research for AMR gene"
     shell:
         """
-        abricate --threads {threads} {input.genome_annotation} > {output.tab_amrg}
+        abritamr run --contigs {input.list_fasta_file} --species Escherichia
         """
