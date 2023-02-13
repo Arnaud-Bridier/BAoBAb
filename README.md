@@ -28,7 +28,7 @@ Installing all the dependencies manually:
 
 Soft|Version
 ---------|------------
-[Abricate](https://github.com/tseemann/abricate) | 1.0.1
+[AbritAMR](https://github.com/MDU-PHL/abritamr) | 1.0.13
 [fastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) | 0.11.9
 [Prokka](https://github.com/tseemann/prokka) | 1.14.6
 [Quast](https://quast.sourceforge.net/) | 5.2.0
@@ -41,7 +41,7 @@ Soft|Version
 ### Usage
 
 ```
-usage : snakemake -s snakefile_assembly.py
+snakemake -s snakefile_assembly.py
 ```
 
 ### Requirements
@@ -54,7 +54,7 @@ usage : snakemake -s snakefile_assembly.py
 ### Usage
 
 ```
-usage : snakemake -s snakefile_variant_calling.py --configfile config.yaml
+snakemake -s snakefile_variant_calling.py --configfile config.yaml
 ```
 
 ### Requirements
