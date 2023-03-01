@@ -5,23 +5,24 @@ folder = ["fastqc", "trimmed_reads", "assemblyqc", "genome_annotation", "genome_
 for f in folder:
     os.mkdir(f)
 
-POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}_001.fastq.gz")
+POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}.fastq.gz")
 
 # Rule for the latest files wanted
 rule all:
     input:
-        expand("fastqc/{pos}_{frr}_001_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
+        expand("fastqc/{pos}_{frr}_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
         expand("assemblyqc/{pos}_assemblyqc/report.html", pos=POS),
-        expand("genome_annotation/{pos}_annotation/{pos}.tab", pos=POS),
         "abritamr_result/abritamr.txt"
 
 # FastQC
 rule fastQC:
     input:
-        rawreads = "raw_reads/{pos}_{frr}_001.fastq.gz"
+        rawreads = "raw_reads/{pos}_{frr}.fastq.gz"
     output:
-        zip = "fastqc/{pos}_{frr}_001_fastqc.zip",
-        html = "fastqc/{pos}_{frr}_001_fastqc.html"
+        zip = "fastqc/{pos}_{frr}_fastqc.zip",
+        html = "fastqc/{pos}_{frr}_fastqc.html"
+    conda:
+        "envs/fastqc.yaml"
     message:
         "Make QC of raw reads."
     threads: 2
@@ -35,13 +36,15 @@ rule fastQC:
 # Trimmed reads
 rule trimmomatic:
     input:
-        r1 = "raw_reads/{pos}_R1_001.fastq.gz",
-        r2 = "raw_reads/{pos}_R2_001.fastq.gz",
+        r1 = "raw_reads/{pos}_R1.fastq.gz",
+        r2 = "raw_reads/{pos}_R2.fastq.gz",
     output:
         forward_paired = "trimmed_reads/{pos}_1P.fastq",
         reverse_paired = "trimmed_reads/{pos}_2P.fastq",
         forward_unpaired = "trimmed_reads/{pos}_1U.fastq",
         reverse_unpaired = "trimmed_reads/{pos}_2U.fastq"
+    conda:
+        "envs/fastqc.yaml"
     message:
         "Trimm reads."
     threads: 8
@@ -81,6 +84,8 @@ rule assembly:
         unpaired = rules.unpaired.output.forward_and_reverse_unpaired
     output:
         genome_assembly = "genome_assembly/{pos}_assembly/assembly.fasta"
+    conda:
+        "envs/unicycler.yaml"
     message:
         "Assembly genome."
     log:
@@ -106,7 +111,9 @@ rule prokka:
         genome_assembly = rules.assembly.output.genome_assembly
     output:
         genome_annotation = "genome_annotation/{pos}_annotation/{pos}.gff",
-        genome_fasta = dynamic("genome_annotation/{pos}_annotation/{pos}.fna")
+	genome_fasta = "genome_annotation/{pos}_annotation/{pos}.fna"
+    conda:
+        "envs/prokka.yaml"
     message:
         "Annotate the genome."
     log:
@@ -138,6 +145,8 @@ rule quast:
 
     output:
         html = "assemblyqc/{pos}_assemblyqc/report.html"
+    conda:
+        "envs/quast.yaml"
     message:
         "Assembly QC"
     log:
@@ -159,36 +168,32 @@ rule quast:
         --glimmer
         """
 
+# Obtain assembly path
+rule take_assembly_path:
+    input:
+        assembly = expand("genome_annotation/{pos}_annotation/{pos}.fna", pos=POS)
+    output:
+        assembly_path = "abritamr_result/assembly_path.txt"
+    message:
+        "Regroup all the path of the snps.tab"
+    shell:
+        """
+        realpath {input.assembly} >> {output.assembly_path}
+        """
+
 # Take assembly of strains in one file
 rule regroup_fasta_file:
     input:
-        genome_fasta = rules.genome_annotation.output.genome_fasta
+        genome_fasta = rules.take_assembly_path.output.assembly_path
     output:
         fasta_file = "abritamr_result/fasta_abritamr.tsv"
     message:
         "Regroup fasta file for abritamr"
-    run:
-        list_fasta_strain_file = {}
-
-        strains_folder = os.listdir("genome_annotation/")
-
-        for f in strains_folder:
-
-            #Obtain fasta file name.
-            strain_name = f[:-11]
-            fasta_strain_file = strain_name + ".fna"
-
-            #Recup the strain name and path file.
-            strain = strain_name.split("_")[0]
-            path_fasta_file = "genome_annotation/" + f + "/" + fasta_strain_file
-
-            list_fasta_strain_file[strain] = "genome_annotation/" + f + "/" + fasta_strain_file
-
-        file_fasta = "abritamr_result/fasta_abritamr.tsv"
-
-        with open(file_fasta, 'w') as txtfile:
-            for strain, path in list_fasta_strain_file.items():
-                txtfile.write(f'{strain}\t{path}\n')
+    shell:
+        """
+        python3 regroup_fasta_file_for_abritamr.py --input {input.genome_fasta} --output {output.fasta_file}
+        """
+        
 
 # Research for antimicrobial genes resistance
 rule abritamr:
@@ -196,9 +201,12 @@ rule abritamr:
         list_fasta_file = rules.regroup_fasta_file.output.fasta_file
     output:
         summary_abritamr = "abritamr_result/abritamr.txt"
+    conda:
+        "envs/abritamr.yaml"
     message:
         "Research for AMR gene"
     shell:
         """
         abritamr run --contigs {input.list_fasta_file} --species Escherichia
+	./move_abritamr_result.sh
         """

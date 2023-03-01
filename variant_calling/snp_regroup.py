@@ -1,18 +1,34 @@
-import sys
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Grouping of variant call results between different conditions in the metadata file
+"""
+import argparse
 import os
 import csv
 
-"""
-Input.
-"""
-path_metadata = str(sys.argv[1]) # Metadata of the different strains
-path_tab_files = str(sys.argv[2]) # Path file for strains variants
-path_snippy = str(sys.argv[3]) # Path for snippy
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--metadata",
+                        help="Metadata csv file",
+                        dest="metadata",
+                        required=True)
+parser.add_argument("--input",
+                        help="path of the variant file",
+                        dest="input",
+                        required=True)
+parser.add_argument("--directory",
+                        help="directory",
+                        dest="directory",
+                        required=True)
+
+args = parser.parse_args()
 
 """
 Opening the metadata file and creating the dictionary with the strains for each biocide and resistance.
 """
-with open(path_metadata, newline='') as csvfile:
+with open(args.metadata, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
     metadata = []
     for i in reader:
@@ -36,7 +52,7 @@ for s in metadata[1:]:
 """
 Recovery of all .tab files with variants in them.
 """
-with open(path_tab_files) as txtfile:
+with open(args.input) as txtfile:
     tab_files = txtfile.read().split("\n")
 
 """
@@ -173,12 +189,12 @@ Output.
 
 # Create the output folder.
 try:
-    os.mkdir(f"{path_snippy}/output")
+    os.mkdir(f"{args.directory}/output")
 except OSError as e:
     print(os.strerror(e.errno))
 
 for names, csvs in output_csv.items():
-    with open(f'{path_snippy}/output/{names}', 'w', newline='') as csvfile:
+    with open(f'{args.directory}/output/{names}', 'w', newline='') as csvfile:
         file = csv.writer(csvfile, dialect='excel', delimiter='\t')
         for i in csvs:
             file.writerow(i)

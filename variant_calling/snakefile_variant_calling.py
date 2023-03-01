@@ -1,7 +1,7 @@
 import os
 import glob
 
-POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}_001.fastq.gz")
+POS,FRR = glob_wildcards("raw_reads/{pos}_{frr}.fastq.gz")
 
 folder = ["fastqc", "trimmed_reads", "snippy"]
 for f in folder:
@@ -10,16 +10,18 @@ for f in folder:
 # Rule for the latest files wanted
 rule all:
     input:
-        expand("fastqc/{pos}_{frr}_001_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
+        expand("fastqc/{pos}_{frr}_fastqc.{extension}", pos=POS, frr=FRR, extension=["zip", "html"]),
         "snippy/output/variants.tab"
 
 # FastQC
 rule fastQC:
     input:
-        rawreads = "raw_reads/{pos}_{frr}_001.fastq.gz"
+        rawreads = "raw_reads/{pos}_{frr}.fastq.gz"
     output:
-        zip = "fastqc/{pos}_{frr}_001_fastqc.zip",
-        html = "fastqc/{pos}_{frr}_001_fastqc.html"
+        zip = "fastqc/{pos}_{frr}_fastqc.zip",
+        html = "fastqc/{pos}_{frr}_fastqc.html"
+    conda:
+        "envs/fastqc.yaml"
     message:
         "Make QC of raw reads."
     threads: 2
@@ -33,11 +35,13 @@ rule fastQC:
 # Trimmed reads
 rule trimmomatic:
     input:
-        r1 = "raw_reads/{pos}_R1_001.fastq.gz",
-        r2 = "raw_reads/{pos}_R2_001.fastq.gz"
+        r1 = "raw_reads/{pos}_R1.fastq.gz",
+        r2 = "raw_reads/{pos}_R2.fastq.gz"
     output:
         forward_paired = "trimmed_reads/{pos}_1P.fastq",
         reverse_paired = "trimmed_reads/{pos}_2P.fastq"
+    conda:
+        "envs/fastqc.yaml"
     message:
         "Trimm reads."
     threads: 8
@@ -63,6 +67,8 @@ rule snippy:
         genome_ref = config["reference"]
     output:
         snps_tab = "snippy/{pos}/{pos}_snps.tab"
+    conda:
+        "envs/snippy.yaml"
     message:
         "Call the variant"
     threads: 32
@@ -107,5 +113,5 @@ rule regroup_variant:
         directory = "snippy/"
     shell:
         """ 
-        python3 snp_regroup.py {input.metadata} {input.snps_path_tab} {params.directory}
+        python3 snp_regroup.py --metadata {input.metadata} --input {input.snps_path_tab} --directory {params.directory}
         """
