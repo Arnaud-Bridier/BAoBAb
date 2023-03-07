@@ -41,7 +41,7 @@ for f in assembly_path:
 for f in temp_file:
 
     #Obtain fasta file name.
-    strain_name = (f.split("/")[-1][:-5]).split("_")[0]
+    strain_name = f.split("/")[-1][:-5]
 
     list_fasta_strain_file[strain_name] = f
 
