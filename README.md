@@ -14,12 +14,12 @@ This project contains two pipelines handled by Snakemake :
 
 ## Installation
 
-### Conda
+### Source
 
-Creating a conda environment using `baobab_env.yml`.
+Install the latest version of BAoBAb tools in your directory.
 
 ```
-conda env create -f baobab_env.yml
+git clone https://github.com/BAoBAb-biofilm/BAoBAb.git
 ```
 
 ### Dependencies
